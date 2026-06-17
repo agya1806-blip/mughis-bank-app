@@ -1,0 +1,11 @@
+name = "mughis-bank"
+compatibility_date = "2024-04-01"
+pages_build_output_dir = ".vercel/output/static"
+
+[env.production]
+vars = { NEXT_PUBLIC_SITE_URL = "https://mughis-bank.pages.dev" }
+
+# Set these in Cloudflare Dashboard > Pages > project > Settings > Environment Variables
+# NEXT_PUBLIC_SUPABASE_URL
+# NEXT_PUBLIC_SUPABASE_ANON_KEY
+# NEXT_PUBLIC_GEMINI_API_KEY (optional)
