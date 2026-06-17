@@ -1,6 +1,7 @@
 name = "mughis-bank-app"
 compatibility_date = "2024-04-01"
 pages_build_output_dir = "out"
+command = "npm run build"
 
 [env.production]
 vars = { NEXT_PUBLIC_SITE_URL = "https://mughis-bank-app.pages.dev" }
