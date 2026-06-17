@@ -259,86 +259,104 @@ ALTER TABLE user_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_insights ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies: Users can only access their own data
+DROP POLICY IF EXISTS "Users can manage own business profile" ON business_profiles;
 CREATE POLICY "Users can manage own business profile"
   ON business_profiles FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can manage own payment methods" ON payment_methods;
 CREATE POLICY "Users can manage own payment methods"
   ON payment_methods FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can manage own wallets" ON wallets;
 CREATE POLICY "Users can manage own wallets"
   ON wallets FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can manage own categories" ON categories;
 CREATE POLICY "Users can manage own categories"
   ON categories FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can manage own transactions" ON transactions;
 CREATE POLICY "Users can manage own transactions"
   ON transactions FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can manage own customers" ON customers;
 CREATE POLICY "Users can manage own customers"
   ON customers FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can manage own products" ON products;
 CREATE POLICY "Users can manage own products"
   ON products FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can manage own invoices" ON invoices;
 CREATE POLICY "Users can manage own invoices"
   ON invoices FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can manage own invoice items" ON invoice_items;
 CREATE POLICY "Users can manage own invoice items"
   ON invoice_items FOR ALL
   USING (EXISTS (SELECT 1 FROM invoices WHERE invoices.id = invoice_items.invoice_id AND invoices.user_id = auth.uid()));
 
+DROP POLICY IF EXISTS "Users can manage own spec_print" ON spec_print;
 CREATE POLICY "Users can manage own spec_print"
   ON spec_print FOR ALL
   USING (EXISTS (SELECT 1 FROM invoices WHERE invoices.id = spec_print.invoice_id AND invoices.user_id = auth.uid()));
 
+DROP POLICY IF EXISTS "Users can manage own spec_laptop" ON spec_laptop;
 CREATE POLICY "Users can manage own spec_laptop"
   ON spec_laptop FOR ALL
   USING (EXISTS (SELECT 1 FROM invoices WHERE invoices.id = spec_laptop.invoice_id AND invoices.user_id = auth.uid()));
 
+DROP POLICY IF EXISTS "Users can manage own spec_umum" ON spec_umum;
 CREATE POLICY "Users can manage own spec_umum"
   ON spec_umum FOR ALL
   USING (EXISTS (SELECT 1 FROM invoices WHERE invoices.id = spec_umum.invoice_id AND invoices.user_id = auth.uid()));
 
+DROP POLICY IF EXISTS "Users can manage own debts" ON debts;
 CREATE POLICY "Users can manage own debts"
   ON debts FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can manage own receivables" ON receivables;
 CREATE POLICY "Users can manage own receivables"
   ON receivables FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can manage own budgets" ON budgets;
 CREATE POLICY "Users can manage own budgets"
   ON budgets FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can view own audit logs" ON audit_logs;
 CREATE POLICY "Users can view own audit logs"
   ON audit_logs FOR ALL
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can manage own preferences" ON user_preferences;
 CREATE POLICY "Users can manage own preferences"
   ON user_preferences FOR ALL
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can view own AI insights" ON ai_insights;
 CREATE POLICY "Users can view own AI insights"
   ON ai_insights FOR ALL
   USING (auth.uid() = user_id)

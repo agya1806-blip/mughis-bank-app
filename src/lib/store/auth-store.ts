@@ -1,14 +1,19 @@
 "use client";
 
 import { create } from "zustand";
-import { createClient } from "@/lib/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import { createClient } from "@/lib/localDb";
+
+interface LocalUser {
+  id: string;
+  email: string;
+  user_metadata?: { full_name?: string };
+}
 
 interface AuthState {
-  user: User | null;
+  user: LocalUser | null;
   loading: boolean;
   initialized: boolean;
-  setUser: (user: User | null) => void;
+  setUser: (user: LocalUser | null) => void;
   initialize: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error?: string }>;
@@ -26,10 +31,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   initialize: async () => {
     try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const client = createClient();
+      const { data: { user } } = await client.auth.getUser();
       set({ user, initialized: true, loading: false });
     } catch {
       set({ initialized: true, loading: false });
@@ -38,13 +41,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signIn: async (email, password) => {
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const client = createClient();
+      const { error, data } = await client.auth.signInWithPassword({ email, password });
       if (error) return { error: error.message };
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      set({ user });
+      set({ user: data?.user || null });
       return {};
     } catch (err: any) {
       return { error: err.message };
@@ -53,13 +53,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signUp: async (email, password, fullName) => {
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { full_name: fullName } },
-      });
+      const client = createClient();
+      const { error } = await client.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
       if (error) return { error: error.message };
+      set({ user: null });
       return {};
     } catch (err: any) {
       return { error: err.message };
@@ -67,27 +64,19 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signInWithGoogle: async () => {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    // Google Login tidak tersedia di mode lokal
   },
 
   signOut: async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    const client = createClient();
+    await client.auth.signOut();
     set({ user: null });
   },
 
   resetPassword: async (email) => {
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
-      });
+      const client = createClient();
+      const { error } = await client.auth.resetPasswordForEmail(email);
       if (error) return { error: error.message };
       return {};
     } catch (err: any) {

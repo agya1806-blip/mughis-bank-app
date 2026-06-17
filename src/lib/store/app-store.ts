@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import type { Wallet, Category, Customer, Product, Transaction, Invoice, Debt, Receivable, BusinessProfile, PaymentMethod } from "@/types";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@/lib/localDb";
 
 interface AppState {
   wallets: Wallet[];
@@ -42,6 +42,8 @@ interface AppState {
   fetchPaymentMethods: () => Promise<void>;
 }
 
+const client = createClient();
+
 export const useAppStore = create<AppState>((set) => ({
   wallets: [],
   categories: [],
@@ -69,21 +71,20 @@ export const useAppStore = create<AppState>((set) => ({
 
   fetchAll: async () => {
     set({ loading: true });
-    const supabase = createClient();
-    const user = (await supabase.auth.getUser()).data.user;
+    const user = (await client.auth.getUser()).data.user;
     if (!user) return;
 
     const fetches = await Promise.all([
-      supabase.from("wallets").select("*").eq("user_id", user.id).eq("is_active", true),
-      supabase.from("categories").select("*").eq("user_id", user.id).eq("is_active", true),
-      supabase.from("customers").select("*").eq("user_id", user.id).order("name"),
-      supabase.from("products").select("*").eq("user_id", user.id).eq("is_active", true),
-      supabase.from("transactions").select("*, wallets(*), categories(*)").eq("user_id", user.id).order("date", { ascending: false }).limit(100),
-      supabase.from("invoices").select("*, customers(*)").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("debts").select("*, wallets(*)").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("receivables").select("*, wallets(*)").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("business_profiles").select("*").eq("user_id", user.id).single(),
-      supabase.from("payment_methods").select("*").eq("user_id", user.id).eq("is_active", true),
+      client.from("wallets").select("*").eq("user_id", user.id).eq("is_active", true),
+      client.from("categories").select("*").eq("user_id", user.id).eq("is_active", true),
+      client.from("customers").select("*").eq("user_id", user.id).order("name"),
+      client.from("products").select("*").eq("user_id", user.id).eq("is_active", true),
+      client.from("transactions").select("*, wallets(*), categories(*)").eq("user_id", user.id).order("date", { ascending: false }).limit(100),
+      client.from("invoices").select("*, customers(*)").eq("user_id", user.id).order("created_at", { ascending: false }),
+      client.from("debts").select("*, wallets(*)").eq("user_id", user.id).order("created_at", { ascending: false }),
+      client.from("receivables").select("*, wallets(*)").eq("user_id", user.id).order("created_at", { ascending: false }),
+      client.from("business_profiles").select("*").eq("user_id", user.id).single(),
+      client.from("payment_methods").select("*").eq("user_id", user.id).eq("is_active", true),
     ]);
 
     set({
@@ -102,82 +103,72 @@ export const useAppStore = create<AppState>((set) => ({
   },
 
   fetchWallets: async () => {
-    const supabase = createClient();
-    const user = (await supabase.auth.getUser()).data.user;
+    const user = (await client.auth.getUser()).data.user;
     if (!user) return;
-    const { data } = await supabase.from("wallets").select("*").eq("user_id", user.id).eq("is_active", true);
-    if (data) set({ wallets: data });
+    const { data } = await client.from("wallets").select("*").eq("user_id", user.id).eq("is_active", true);
+    if (data) set({ wallets: data as Wallet[] });
   },
 
   fetchCategories: async () => {
-    const supabase = createClient();
-    const user = (await supabase.auth.getUser()).data.user;
+    const user = (await client.auth.getUser()).data.user;
     if (!user) return;
-    const { data } = await supabase.from("categories").select("*").eq("user_id", user.id).eq("is_active", true);
-    if (data) set({ categories: data });
+    const { data } = await client.from("categories").select("*").eq("user_id", user.id).eq("is_active", true);
+    if (data) set({ categories: data as Category[] });
   },
 
   fetchCustomers: async () => {
-    const supabase = createClient();
-    const user = (await supabase.auth.getUser()).data.user;
+    const user = (await client.auth.getUser()).data.user;
     if (!user) return;
-    const { data } = await supabase.from("customers").select("*").eq("user_id", user.id).order("name");
-    if (data) set({ customers: data });
+    const { data } = await client.from("customers").select("*").eq("user_id", user.id).order("name");
+    if (data) set({ customers: data as Customer[] });
   },
 
   fetchProducts: async () => {
-    const supabase = createClient();
-    const user = (await supabase.auth.getUser()).data.user;
+    const user = (await client.auth.getUser()).data.user;
     if (!user) return;
-    const { data } = await supabase.from("products").select("*").eq("user_id", user.id).eq("is_active", true);
-    if (data) set({ products: data });
+    const { data } = await client.from("products").select("*").eq("user_id", user.id).eq("is_active", true);
+    if (data) set({ products: data as Product[] });
   },
 
   fetchTransactions: async () => {
-    const supabase = createClient();
-    const user = (await supabase.auth.getUser()).data.user;
+    const user = (await client.auth.getUser()).data.user;
     if (!user) return;
-    const { data } = await supabase.from("transactions").select("*, wallets(*), categories(*)").eq("user_id", user.id).order("date", { ascending: false }).limit(100);
-    if (data) set({ transactions: data });
+    const { data } = await client.from("transactions").select("*, wallets(*), categories(*)").eq("user_id", user.id).order("date", { ascending: false }).limit(100);
+    if (data) set({ transactions: data as Transaction[] });
   },
 
   fetchInvoices: async () => {
-    const supabase = createClient();
-    const user = (await supabase.auth.getUser()).data.user;
+    const user = (await client.auth.getUser()).data.user;
     if (!user) return;
-    const { data } = await supabase.from("invoices").select("*, customers(*)").eq("user_id", user.id).order("created_at", { ascending: false });
-    if (data) set({ invoices: data });
+    const { data } = await client.from("invoices").select("*, customers(*)").eq("user_id", user.id).order("created_at", { ascending: false });
+    if (data) set({ invoices: data as Invoice[] });
   },
 
   fetchDebts: async () => {
-    const supabase = createClient();
-    const user = (await supabase.auth.getUser()).data.user;
+    const user = (await client.auth.getUser()).data.user;
     if (!user) return;
-    const { data } = await supabase.from("debts").select("*, wallets(*)").eq("user_id", user.id).order("created_at", { ascending: false });
-    if (data) set({ debts: data });
+    const { data } = await client.from("debts").select("*, wallets(*)").eq("user_id", user.id).order("created_at", { ascending: false });
+    if (data) set({ debts: data as Debt[] });
   },
 
   fetchReceivables: async () => {
-    const supabase = createClient();
-    const user = (await supabase.auth.getUser()).data.user;
+    const user = (await client.auth.getUser()).data.user;
     if (!user) return;
-    const { data } = await supabase.from("receivables").select("*, wallets(*)").eq("user_id", user.id).order("created_at", { ascending: false });
-    if (data) set({ receivables: data });
+    const { data } = await client.from("receivables").select("*, wallets(*)").eq("user_id", user.id).order("created_at", { ascending: false });
+    if (data) set({ receivables: data as Receivable[] });
   },
 
   fetchBusinessProfile: async () => {
-    const supabase = createClient();
-    const user = (await supabase.auth.getUser()).data.user;
+    const user = (await client.auth.getUser()).data.user;
     if (!user) return;
-    const { data } = await supabase.from("business_profiles").select("*").eq("user_id", user.id).single();
-    if (data) set({ businessProfile: data });
+    const { data } = await client.from("business_profiles").select("*").eq("user_id", user.id).single();
+    if (data) set({ businessProfile: data as BusinessProfile });
   },
 
   fetchPaymentMethods: async () => {
-    const supabase = createClient();
-    const user = (await supabase.auth.getUser()).data.user;
+    const user = (await client.auth.getUser()).data.user;
     if (!user) return;
-    const { data } = await supabase.from("payment_methods").select("*").eq("user_id", user.id).eq("is_active", true);
-    if (data) set({ paymentMethods: data });
+    const { data } = await client.from("payment_methods").select("*").eq("user_id", user.id).eq("is_active", true);
+    if (data) set({ paymentMethods: data as PaymentMethod[] });
   },
 }));

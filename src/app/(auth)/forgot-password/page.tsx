@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
       toast.error(error);
     } else {
       setSent(true);
-      toast.success("Email reset password telah dikirim!");
+      toast.success("Password berhasil direset!");
     }
   }
 
@@ -39,10 +39,10 @@ export default function ForgotPasswordPage() {
           <span className="text-2xl font-bold text-white font-heading">MB</span>
         </div>
         <h1 className="text-2xl font-extrabold font-heading text-slate-900 dark:text-white">
-          Lupa <span className="text-gradient">Password</span>
+          Reset <span className="text-gradient">Password</span>
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          {sent ? "Cek email Anda untuk tautan reset password" : "Masukkan email untuk menerima tautan reset password"}
+          {sent ? "Password Anda sudah direset, silakan login dengan password baru" : "Masukkan email untuk reset password"}
         </p>
       </div>
 
@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
             <Send className="w-8 h-8 text-teal-600 dark:text-teal-400" />
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Tautan reset password telah dikirim ke <strong className="text-slate-700 dark:text-slate-300">{email}</strong>
+            Password untuk <strong className="text-slate-700 dark:text-slate-300">{email}</strong> telah direset
           </p>
         </div>
       )}

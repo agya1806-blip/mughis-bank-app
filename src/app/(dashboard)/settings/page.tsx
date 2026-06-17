@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import { useAppStore } from "@/lib/store/app-store";
 import { useAuthStore } from "@/lib/store/auth-store";
 import { useThemeStore } from "@/lib/store/theme-store";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, exportDb, importDb } from "@/lib/localDb";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Modal } from "@/components/ui/modal";
 import toast from "react-hot-toast";
-import { Sun, Moon, LogOut, Building2, Banknote, Plus, Trash2, Sparkles } from "lucide-react";
+import { Sun, Moon, LogOut, Building2, Banknote, Plus, Trash2, Sparkles, Download, Upload } from "lucide-react";
 
 export default function SettingsPage() {
   const user = useAuthStore((s) => s.user);
@@ -94,8 +94,8 @@ export default function SettingsPage() {
               {user?.email?.charAt(0).toUpperCase() || "U"}
             </div>
             <div>
-              <p className="font-semibold text-slate-800 dark:text-slate-200">{user?.email}</p>
-              <p className="text-xs text-slate-400">Terdaftar via Supabase Auth</p>
+              <p className="font-semibold text-slate-800 dark:text-slate-200">{user?.email || user?.user_metadata?.full_name || "User"}</p>
+              <p className="text-xs text-slate-400">Data disimpan di browser (lokal)</p>
             </div>
           </div>
         </div>
@@ -154,6 +154,46 @@ export default function SettingsPage() {
             ))}
           </div>
         )}
+      </Card>
+
+      {/* Export/Import */}
+      <Card>
+        <CardTitle>💾 Backup & Restore</CardTitle>
+        <div className="space-y-3">
+          <p className="text-sm text-slate-500">Download semua data (dompet, transaksi, invoice, dll) atau restore dari backup sebelumnya.</p>
+          <div className="flex gap-3">
+            <Button variant="secondary" className="flex-1" onClick={() => {
+              const json = exportDb();
+              const blob = new Blob([json], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `mughis-bank-backup-${new Date().toISOString().split("T")[0]}.json`;
+              a.click();
+              URL.revokeObjectURL(url);
+              toast.success("Data berhasil diexport!");
+            }}>
+              <Download className="w-4 h-4" /> Export Data
+            </Button>
+            <Button variant="secondary" className="flex-1" onClick={() => {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = ".json";
+              input.onchange = async (e: any) => {
+                const file = e.target?.files?.[0];
+                if (!file) return;
+                const text = await file.text();
+                const err = importDb(text);
+                if (err) return toast.error(err);
+                toast.success("Data berhasil diimport! Halaman akan di-refresh.");
+                setTimeout(() => window.location.reload(), 1500);
+              };
+              input.click();
+            }}>
+              <Upload className="w-4 h-4" /> Import Data
+            </Button>
+          </div>
+        </div>
       </Card>
 
       {/* Theme */}
